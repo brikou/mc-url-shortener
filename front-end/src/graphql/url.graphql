@@ -1,0 +1,13 @@
+query urls {
+  urls {
+    key
+    link
+  }
+}
+
+mutation createUrl($createUrlInput: CreateUrlInput!) {
+  createUrl(createUrlInput: $createUrlInput) {
+    key
+    link
+  }
+}

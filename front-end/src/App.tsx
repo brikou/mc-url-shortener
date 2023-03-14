@@ -1,71 +1,75 @@
-import React, { FormEvent, useState } from 'react';
+import React, { useState } from 'react';
 import logo from './logo.svg';
-import {
-  useAddMessageMutation,
-  useGetMessagesQuery,
-} from './graphql/message.generated';
+import { useCreateUrlMutation, useUrlsQuery } from './graphql/url.generated';
 
-function App() {
-  const [newMessage, setNewMessage] = useState({ value: '' });
-  const { data, refetch } = useGetMessagesQuery();
-  const [addMessage] = useAddMessageMutation();
+function ShortUrlContainer() {
+  const [link, setLink] = useState('');
+  const { data, refetch } = useUrlsQuery();
+  const [createUrl] = useCreateUrlMutation();
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewMessage({ value: e.target.value });
+  const onChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+    setLink(event.currentTarget.value);
   };
 
-  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (newMessage.value) {
-      await addMessage({ variables: { message: newMessage.value } });
-      setNewMessage({ value: '' });
+  const onSubmit: React.FormEventHandler = async (event) => {
+    event.preventDefault();
+
+    if (link) {
+      await createUrl({ variables: { createUrlInput: { link } } });
+      setLink('');
       await refetch();
     }
   };
 
   return (
+    <div
+      data-cy="urlContainer"
+      className="p-8 flex flex-col gap-6 items-center bg-white rounded-2xl"
+    >
+      <div className="font-semibold text-xl">Short URLs</div>
+      <div className="font-semibold">
+        <form className="flex gap-4" onSubmit={onSubmit}>
+          <input
+            data-cy="messageInput"
+            placeholder="https://www.example.com"
+            className="p-3 w-96 border-2 rounded-full border-main-blue"
+            value={link}
+            onChange={onChange}
+            type="url"
+          />
+          <button
+            data-cy="submit"
+            type="submit"
+            className="p-3 bg-main-blue text-white rounded-full"
+          >
+            Shorten URL
+          </button>
+        </form>
+      </div>
+      {data?.urls.map((url) => (
+        <div key={url.key}>
+          <a
+            href={`http://localhost:4000/urls/${url.key}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {url.link}
+          </a>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  return (
     <div className="bg-main-blue min-h-screen">
       <header className="container mx-auto py-14 flex justify-between">
         <img src={logo} className="App-logo" alt="logo" />
-        <h1 className="text-white font-bold text-2xl">
-          URL shortener
-        </h1>
+        <h1 className="text-white font-bold text-2xl">URL shortener</h1>
       </header>
       <section className="container mx-auto py-8">
-        <div
-          data-cy="messageContainer"
-          className="p-8 flex flex-col gap-6 items-center bg-white rounded-2xl"
-        >
-          <div
-            className="font-semibold text-xl"
-          >
-            Add a few messages to ensure that everything is working correctly :
-          </div>
-          {data?.messages.map((message) => (
-            <div key={message.id}>{message.message}</div>
-          ))}
-          <div className="font-semibold">
-            <form
-              className="flex gap-4"
-              onSubmit={onSubmit}
-            >
-              <input
-                data-cy="messageInput"
-                placeholder="Your message"
-                className="p-3 w-96 border-2 rounded-full border-main-blue"
-                value={newMessage.value}
-                onChange={onChange}
-              />
-              <button
-                data-cy="submit"
-                type="submit"
-                className="p-3 bg-main-blue text-white rounded-full"
-              >
-                Add message
-              </button>
-            </form>
-          </div>
-        </div>
+        <ShortUrlContainer />
       </section>
     </div>
   );

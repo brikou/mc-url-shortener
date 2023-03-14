@@ -12,6 +12,10 @@ export type Scalars = {
   Float: number;
 };
 
+export type CreateUrlInput = {
+  link: Scalars['String'];
+};
+
 export type MessageDto = {
   __typename?: 'MessageDto';
   id?: Maybe<Scalars['Int']>;
@@ -20,7 +24,13 @@ export type MessageDto = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createUrl: Url;
   message: MessageDto;
+};
+
+
+export type MutationCreateUrlArgs = {
+  createUrlInput: CreateUrlInput;
 };
 
 
@@ -31,4 +41,18 @@ export type MutationMessageArgs = {
 export type Query = {
   __typename?: 'Query';
   messages: Array<MessageDto>;
+  url: Url;
+  urls: Array<Url>;
+};
+
+
+export type QueryUrlArgs = {
+  key: Scalars['String'];
+};
+
+export type Url = {
+  __typename?: 'Url';
+  id: Scalars['ID'];
+  key: Scalars['String'];
+  link: Scalars['String'];
 };
